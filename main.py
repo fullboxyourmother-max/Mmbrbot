@@ -2,6 +2,7 @@ import os
 import threading
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from bale import MenuKeyboardMarkup, MenuButton
 from bot import bot
 
 # ---------------------------------------------------------
@@ -35,7 +36,7 @@ class RailwayHealthCheck(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(b"Bale Income Bot with Admin Panel is Active!")
+        self.wfile.write(b"Bale Income Bot is Running Perfectly!")
     def log_message(self, format, *args):
         return  
 
@@ -45,48 +46,45 @@ def start_health_server():
     server.serve_forever()
 
 # ---------------------------------------------------------
-# کیبورد اصلی ربات (منو به صورت آرایه متنی ساده)
+# کیبوردهای ربات با استاندارد رسمی کتابخانه بله
 # ---------------------------------------------------------
 def get_main_keyboard():
-    return {
-        "keyboard": [
-            [{"text": "💎 شروع کسب درآمد 💎"}],
-            [{"text": "🏠 حساب کاربری"}, {"text": "🌟 برترین کاربران"}],
-            [{"text": "💸 برداشت از حساب"}, {"text": "📊 تاریخچه برداشت"}],
-            [{"text": "📜 قوانین"}, {"text": "📞 پشتیبانی"}, {"text": "📚 راهنما"}]
+    return MenuKeyboardMarkup(
+        [
+            [MenuButton("💎 شروع کسب درآمد 💎")],
+            [MenuButton("🏠 حساب کاربری"), MenuButton("🌟 برترین کاربران")],
+            [MenuButton("💸 برداشت از حساب"), MenuButton("📊 تاریخچه برداشت")],
+            [MenuButton("📜 قوانین"), MenuButton("📞 پشتیبانی"), MenuButton("📚 راهنما")]
         ],
-        "resize_keyboard": True
-    }
+        resize_keyboard=True
+    )
 
-# کیبورد مخصوص پنل ادمین
 def get_admin_keyboard():
-    return {
-        "keyboard": [
-            [{"text": "📊 آمار کل ربات"}, {"text": "📢 ارسال پیام همگانی"}],
-            [{"text": "🔙 بازگشت به منو اصلی"}]
+    return MenuKeyboardMarkup(
+        [
+            [MenuButton("📊 آمار کل ربات"), MenuButton("📢 ارسال پیام همگانی")],
+            [MenuButton("🔙 بازگشت به منو اصلی")]
         ],
-        "resize_keyboard": True
-    }
+        resize_keyboard=True
+    )
 
-# کیبورد بخش برداشت
 def get_withdraw_keyboard():
-    return {
-        "keyboard": [
-            [{"text": "💳 کارت به کارت"}, {"text": "🎁 پاکت هدیه"}],
-            [{"text": "🔙 بازگشت به منو اصلی"}]
+    return MenuKeyboardMarkup(
+        [
+            [MenuButton("💳 کارت به کارت"), MenuButton("🎁 پاکت هدیه")],
+            [MenuButton("🔙 بازگشت به منو اصلی")]
         ],
-        "resize_keyboard": True
-    }
+        resize_keyboard=True
+    )
 
-# کیبورد دکمه ادمین در حساب کاربری
 def get_admin_option_keyboard():
-    return {
-        "keyboard": [
-            [{"text": "🛠️ پنل ادمین"}],
-            [{"text": "🔙 بازگشت به منو اصلی"}]
+    return MenuKeyboardMarkup(
+        [
+            [MenuButton("🛠️ پنل ادمین")],
+            [MenuButton("🔙 بازگشت به منو اصلی")]
         ],
-        "resize_keyboard": True
-    }
+        resize_keyboard=True
+    )
 
 # ---------------------------------------------------------
 # مدیریت رویدادها و پیام‌های ربات
@@ -94,7 +92,7 @@ def get_admin_option_keyboard():
 @bot.event
 async def on_ready():
     print("====================================")
-    print(f"[Success] Bot @Havijbkbot is ONLINE now!")
+    print(f"[Success] Bot @{bot.username} is fully ONLINE!")
     print("====================================")
 
 @bot.event
@@ -103,7 +101,7 @@ async def on_message(message):
     text = message.content
     db = load_db()
 
-    # ۱. ثبت نام کاربر جدید در دیتابیس
+    # ۱. ثبت نام کاربر جدید
     if user_id not in db:
         db[user_id] = {
             "balance": 0,
@@ -116,13 +114,11 @@ async def on_message(message):
 
     user_data = db[user_id]
 
-    # ---------------------------------------------------------
-    # بخش پاسخ‌های در انتظار (وضعیت‌ها یا Steps)
-    # ---------------------------------------------------------
+    # ۲. بخش پاسخ‌های در انتظار (وضعیت‌ها یا Steps)
     if user_id == ADMIN_ID and user_data.get("step") == "broadcasting":
         db[ADMIN_ID]["step"] = "none"
         save_db(db)
-        await message.reply("⏳ در حال ارسال پیام همگانی به تمام کاربران... لطفا کمی صبر کنید.")
+        await message.reply("⏳ در حال ارسال پیام همگانی به تمام کاربران...")
         
         success_count = 0
         for uid in list(db.keys()):
@@ -141,26 +137,22 @@ async def on_message(message):
         db[user_id]["step"] = "none"
         save_db(db)
         
-        # ارسال اعلان فوری به شما
         notification_text = (
             f"🚨 **درخواست جدید برداشت از حساب!**\n\n"
             f"👤 کاربر: {user_data['username']}\n"
             f"🆔 آیدی عددی: `{user_id}`\n"
             f"💰 مبلغ درخواستی: {text} تومان\n"
-            f"💼 کل موجودی کاربر: {user_data['balance']:,} تومان\n\n"
-            f"توضیح: کاربر دکمه‌ی برداشت را زده و این مقدار را وارد کرده است."
+            f"💼 کل موجودی کاربر: {user_data['balance']:,} تومان"
         )
         try:
             await bot.send_message(int(ADMIN_ID), notification_text)
-        except Exception as e:
-            print(f"Failed to notify admin: {e}")
+        except:
+            pass
             
-        await message.reply("✅ درخواست برداشت شما ثبت شد و برای ادمین ارسال گردید.\nپس از بررسی واریز خواهد شد.", reply_markup=get_main_keyboard())
+        await message.reply("✅ درخواست برداشت شما ثبت شد و برای ادمین ارسال گردید.", reply_markup=get_main_keyboard())
         return
 
-    # ---------------------------------------------------------
-    # دستورات متنی منو
-    # ---------------------------------------------------------
+    # ۳. دستورات متنی منو
     if text.startswith("/start"):
         parts = text.split()
         if len(parts) > 1:
@@ -235,7 +227,7 @@ async def on_message(message):
             "مرحله دوم: بزن رو دکمه 💎 شروع کسب درآمد 💎\n"
             "مرحله سوم: لینک مخصوص رو برای همه دوستانت بفرست\n"
             "مرحله چهارم: بگو استارت کنن عضو کانال های بات بشن\n"
-            "و در آخر با هر دعوت ۱۱۵,۰۰۰ تومان پاداش میگیری ❤️"
+            "و در آخر با هر دعوت ۱۱۵,۰۰0 تومان پاداش میگیری ❤️"
         )
         await message.reply(help_guide)
 
@@ -244,11 +236,9 @@ async def on_message(message):
         save_db(db)
         await message.reply("به منوی اصلی بازگشتید.", reply_markup=get_main_keyboard())
 
-    # ---------------------------------------------------------
-    # دستورات اختصاصی پنل ادمین
-    # ---------------------------------------------------------
+    # دستورات ادمین
     elif text == "🛠️ پنل ادمین" and user_id == ADMIN_ID:
-        await message.reply("به پنل مدیریت ربات هویج خوش آمدید، ادمین عزیز. 🥕\nیکی از گزینه‌ها را انتخاب کنید:", reply_markup=get_admin_keyboard())
+        await message.reply("به پنل مدیریت ربات هویج خوش آمدید، ادمین عزیز. 🥕", reply_markup=get_admin_keyboard())
 
     elif text == "📊 آمار کل ربات" and user_id == ADMIN_ID:
         total_users = len(db)
@@ -265,6 +255,4 @@ async def on_message(message):
 if __name__ == "__main__":
     web_thread = threading.Thread(target=start_health_server, daemon=True)
     web_thread.start()
-    
-    print("[Bot] Connecting to Bale servers...")
     bot.run()
