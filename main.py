@@ -9,6 +9,7 @@ from bot import bot
 # تنظیمات اصلی ادمین (آیدی عددی شما)
 # ---------------------------------------------------------
 ADMIN_ID = "692466131"
+BOT_USERNAME = "Havijbkbot"
 
 # ---------------------------------------------------------
 # پایگاه داده ساده متنی برای ذخیره اطلاعات کاربران
@@ -46,41 +47,34 @@ def start_health_server():
     server.serve_forever()
 
 # ---------------------------------------------------------
-# کیبوردهای ربات با متد استاندارد کلاس Menu در پکیج بله
+# کیبوردهای ربات بر اساس سیستم رسمی پکیج بله
 # ---------------------------------------------------------
 def get_main_keyboard():
-    return bale.Menu(
-        [
-            [bale.MenuButton("💎 شروع کسب درآمد 💎")],
-            [bale.MenuButton("🏠 حساب کاربری"), bale.MenuButton("🌟 برترین کاربران")],
-            [bale.MenuButton("💸 برداشت از حساب"), bale.MenuButton("📊 تاریخچه برداشت")],
-            [bale.MenuButton("📜 قوانین"), bale.MenuButton("📞 پشتیبانی"), bale.MenuButton("📚 راهنما")]
-        ]
-    )
+    # استفاده از ساختار کیبورد واقعی پکیج
+    kb = bale.ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add(bale.KeyboardButton("💎 شروع کسب درآمد 💎"))
+    kb.add(bale.KeyboardButton("🏠 حساب کاربری"), bale.KeyboardButton("🌟 برترین کاربران"))
+    kb.add(bale.KeyboardButton("💸 برداشت از حساب"), bale.KeyboardButton("📊 تاریخچه برداشت"))
+    kb.add(bale.KeyboardButton("📜 قوانین"), bale.KeyboardButton("📞 پشتیبانی"), bale.KeyboardButton("📚 راهنما"))
+    return kb
 
 def get_admin_keyboard():
-    return bale.Menu(
-        [
-            [bale.MenuButton("📊 آمار کل ربات"), bale.MenuButton("📢 ارسال پیام همگانی")],
-            [bale.MenuButton("🔙 بازگشت به منو اصلی")]
-        ]
-    )
+    kb = bale.ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add(bale.KeyboardButton("📊 آمار کل ربات"), bale.KeyboardButton("📢 ارسال پیام همگانی"))
+    kb.add(bale.KeyboardButton("🔙 بازگشت به منو اصلی"))
+    return kb
 
 def get_withdraw_keyboard():
-    return bale.Menu(
-        [
-            [bale.MenuButton("💳 کارت به کارت"), bale.MenuButton("🎁 پاکت هدیه")],
-            [bale.MenuButton("🔙 بازگشت به منو اصلی")]
-        ]
-    )
+    kb = bale.ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add(bale.KeyboardButton("💳 کارت به کارت"), bale.KeyboardButton("🎁 پاکت هدیه"))
+    kb.add(bale.KeyboardButton("🔙 بازگشت به منو اصلی"))
+    return kb
 
 def get_admin_option_keyboard():
-    return bale.Menu(
-        [
-            [bale.MenuButton("🛠️ پنل ادمین")],
-            [bale.MenuButton("🔙 بازگشت به منو اصلی")]
-        ]
-    )
+    kb = bale.ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add(bale.KeyboardButton("🛠️ پنل ادمین"))
+    kb.add(bale.KeyboardButton("🔙 بازگشت به منو اصلی"))
+    return kb
 
 # ---------------------------------------------------------
 # مدیریت رویدادها و پیام‌های ربات
@@ -88,11 +82,15 @@ def get_admin_option_keyboard():
 @bot.event
 async def on_ready():
     print("====================================")
-    print(f"[Success] Bot @{bot.username} is fully ONLINE!")
+    print(f"[Success] Bot @{BOT_USERNAME} is ONLINE with Admin Panel!")
     print("====================================")
 
 @bot.event
 async def on_message(message):
+    # نادیده گرفتن پیام‌های خود ربات
+    if message.author.bot:
+        return
+
     user_id = str(message.author.id)
     text = message.content
     db = load_db()
@@ -172,7 +170,7 @@ async def on_message(message):
     elif text == "💎 شروع کسب درآمد 💎":
         bot_text = (
             f"👇 با هر دعوت ۱۲۰,۰۰۰ تومان میده 👇\n"
-            f"https://ble.ir/{bot.username}?start={user_id}\n"
+            f"https://ble.ir/{BOT_USERNAME}?start={user_id}\n"
             f"ربات رو استارت کن و پول به جیب بزن! 💸☝️\n\n"
             f"☝️ لینک اختصاصی شما ☝️\n"
             f"با پخش بنر بالا و هر دعوت ۱۲۰,۰۰۰ کسب کنید 🎁🥰"
