@@ -3,7 +3,7 @@ import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
 from bot import bot
-from bale import MenuKeyboardMarkup, MenuButton
+from bale import MenuKeyboardMarkup, Button
 
 # ---------------------------------------------------------
 # وب‌سرور داخلی برای زنده نگه داشتن ربات روی Railway
@@ -34,11 +34,11 @@ async def on_ready():
 async def on_message(message):
     # اگر کاربر دکمه استارت یا شروع رو زد
     if message.content == "/start":
-        # ساخت منوی دکمه‌ای بله
+        # ساخت منوی دکمه‌ای بله با کلاس صحیح Button
         keyboard = MenuKeyboardMarkup(
             [
-                [MenuButton("🎯 منوی اصلی"), MenuButton("📊 آمار من")],
-                [MenuButton("📞 پشتیبانی")]
+                [Button("🎯 منوی اصلی"), Button("📊 آمار من")],
+                [Button("📞 پشتیبانی")]
             ],
             resize_keyboard=True
         )
