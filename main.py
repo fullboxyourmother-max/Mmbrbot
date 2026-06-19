@@ -31,7 +31,6 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    # تبدیل پیام به متن ساده برای بررسی
     text = message.content
 
     if text == "/start":
@@ -59,7 +58,8 @@ async def on_message(message):
 async def main():
     print("[Bot] Connecting to @Havijbkbot ...")
     try:
-        await bot.start()
+        # تغییر مهم: استفاده از run به جای start
+        bot.run()
     except Exception as e:
         print(f"[Error] Failed to start the bot: {e}")
 
