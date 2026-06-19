@@ -1,2 +1,2 @@
-bale.py
+python-bale-bot
 requests
