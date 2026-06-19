@@ -2,7 +2,7 @@ import os
 import threading
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from bale import MenuKeyboardMarkup, MenuButton
+import bale
 from bot import bot
 
 # ---------------------------------------------------------
@@ -36,7 +36,7 @@ class RailwayHealthCheck(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(b"Bale Income Bot is Running Perfectly!")
+        self.wfile.write(b"Bale Income Bot is Active!")
     def log_message(self, format, *args):
         return  
 
@@ -46,44 +46,40 @@ def start_health_server():
     server.serve_forever()
 
 # ---------------------------------------------------------
-# کیبوردهای ربات با استاندارد رسمی کتابخانه بله
+# کیبوردهای ربات با متد استاندارد کلاس Menu در پکیج بله
 # ---------------------------------------------------------
 def get_main_keyboard():
-    return MenuKeyboardMarkup(
+    return bale.Menu(
         [
-            [MenuButton("💎 شروع کسب درآمد 💎")],
-            [MenuButton("🏠 حساب کاربری"), MenuButton("🌟 برترین کاربران")],
-            [MenuButton("💸 برداشت از حساب"), MenuButton("📊 تاریخچه برداشت")],
-            [MenuButton("📜 قوانین"), MenuButton("📞 پشتیبانی"), MenuButton("📚 راهنما")]
-        ],
-        resize_keyboard=True
+            [bale.MenuButton("💎 شروع کسب درآمد 💎")],
+            [bale.MenuButton("🏠 حساب کاربری"), bale.MenuButton("🌟 برترین کاربران")],
+            [bale.MenuButton("💸 برداشت از حساب"), bale.MenuButton("📊 تاریخچه برداشت")],
+            [bale.MenuButton("📜 قوانین"), bale.MenuButton("📞 پشتیبانی"), bale.MenuButton("📚 راهنما")]
+        ]
     )
 
 def get_admin_keyboard():
-    return MenuKeyboardMarkup(
+    return bale.Menu(
         [
-            [MenuButton("📊 آمار کل ربات"), MenuButton("📢 ارسال پیام همگانی")],
-            [MenuButton("🔙 بازگشت به منو اصلی")]
-        ],
-        resize_keyboard=True
+            [bale.MenuButton("📊 آمار کل ربات"), bale.MenuButton("📢 ارسال پیام همگانی")],
+            [bale.MenuButton("🔙 بازگشت به منو اصلی")]
+        ]
     )
 
 def get_withdraw_keyboard():
-    return MenuKeyboardMarkup(
+    return bale.Menu(
         [
-            [MenuButton("💳 کارت به کارت"), MenuButton("🎁 پاکت هدیه")],
-            [MenuButton("🔙 بازگشت به منو اصلی")]
-        ],
-        resize_keyboard=True
+            [bale.MenuButton("💳 کارت به کارت"), bale.MenuButton("🎁 پاکت هدیه")],
+            [bale.MenuButton("🔙 بازگشت به منو اصلی")]
+        ]
     )
 
 def get_admin_option_keyboard():
-    return MenuKeyboardMarkup(
+    return bale.Menu(
         [
-            [MenuButton("🛠️ پنل ادمین")],
-            [MenuButton("🔙 بازگشت به منو اصلی")]
-        ],
-        resize_keyboard=True
+            [bale.MenuButton("🛠️ پنل ادمین")],
+            [bale.MenuButton("🔙 بازگشت به منو اصلی")]
+        ]
     )
 
 # ---------------------------------------------------------
@@ -227,7 +223,7 @@ async def on_message(message):
             "مرحله دوم: بزن رو دکمه 💎 شروع کسب درآمد 💎\n"
             "مرحله سوم: لینک مخصوص رو برای همه دوستانت بفرست\n"
             "مرحله چهارم: بگو استارت کنن عضو کانال های بات بشن\n"
-            "و در آخر با هر دعوت ۱۱۵,۰۰0 تومان پاداش میگیری ❤️"
+            "و در آخر با هر دعوت ۱۱۵,۰۰۰ تومان پاداش میگیری ❤️"
         )
         await message.reply(help_guide)
 
