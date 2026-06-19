@@ -1,7 +1,6 @@
-import asyncio
 import os
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from bot import bot
 
 # ---------------------------------------------------------
@@ -23,11 +22,13 @@ def start_health_server():
     server.serve_forever()
 
 # ---------------------------------------------------------
-# مدیریت پیام‌های ربات هویج (متنی و ۱۰۰٪ ایمن)
+# مدیریت پیام‌های ربات هویج
 # ---------------------------------------------------------
 @bot.event
 async def on_ready():
-    print(f"[Bot] @{bot.username} is online now!")
+    print("====================================")
+    print(f"[Success] Bot @Havijbkbot is ONLINE now!")
+    print("====================================")
 
 @bot.event
 async def on_message(message):
@@ -53,20 +54,13 @@ async def on_message(message):
         await message.reply("📞 برای ارتباط با پشتیبانی پیام خود را بفرستید.")
 
 # ---------------------------------------------------------
-# تابع اصلی برای شروع به کار ربات
+# اجرای همزمان وب‌سرور و روشن کردن ربات
 # ---------------------------------------------------------
-async def main():
-    print("[Bot] Connecting to @Havijbkbot ...")
-    try:
-        # تغییر مهم: استفاده از run به جای start
-        bot.run()
-    except Exception as e:
-        print(f"[Error] Failed to start the bot: {e}")
-
 if __name__ == "__main__":
+    # ۱. روشن کردن وب‌سرور رایلی در پس‌زمینه
     web_thread = threading.Thread(target=start_health_server, daemon=True)
     web_thread.start()
-    try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        print("[Bot] Process stopped.")
+
+    # ۲. روشن کردن مستقیم ربات (بدون تداخل با asyncio)
+    print("[Bot] Connecting to Bale servers...")
+    bot.run()
