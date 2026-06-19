@@ -3,7 +3,6 @@ import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
 from bot import bot
-from bale import MenuKeyboardMarkup, Button
 
 # ---------------------------------------------------------
 # وب‌سرور داخلی برای زنده نگه داشتن ربات روی Railway
@@ -24,7 +23,7 @@ def start_health_server():
     server.serve_forever()
 
 # ---------------------------------------------------------
-# مدیریت پیام‌ها و دکمه‌های ربات هویج
+# مدیریت پیام‌های ربات هویج (متنی و ۱۰۰٪ ایمن)
 # ---------------------------------------------------------
 @bot.event
 async def on_ready():
@@ -32,27 +31,27 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    # اگر کاربر دکمه استارت یا شروع رو زد
-    if message.content == "/start":
-        # ساخت منوی دکمه‌ای بله با کلاس صحیح Button
-        keyboard = MenuKeyboardMarkup(
-            [
-                [Button("🎯 منوی اصلی"), Button("📊 آمار من")],
-                [Button("📞 پشتیبانی")]
-            ],
-            resize_keyboard=True
+    # تبدیل پیام به متن ساده برای بررسی
+    text = message.content
+
+    if text == "/start":
+        help_text = (
+            "سلام فرمانده! به ربات هویج خوش آمدید. 🥕\n\n"
+            "دستورات ربات:\n"
+            "🔸 برای دیدن منو بنویسید: منو\n"
+            "🔸 برای دیدن آمار بنویسید: آمار\n"
+            "🔸 برای پشتیبانی بنویسید: پشتیبانی"
         )
-        await message.reply("سلام فرمانده! به ربات هویج خوش آمدید. 🥕", reply_markup=keyboard)
+        await message.reply(help_text)
     
-    # پاسخ به دکمه‌های منو
-    elif message.content == "🎯 منوی اصلی":
-        await message.reply("شما بخش منوی اصلی را انتخاب کردید.")
+    elif text == "منو":
+        await message.reply("🎯 شما بخش منوی اصلی را انتخاب کردید.")
         
-    elif message.content == "📊 آمار من":
-        await message.reply(f"آمار شما در حال حاضر خالی است.\nآیدی عددی شما: {message.author.id}")
+    elif text == "آمار":
+        await message.reply(f"📊 آمار شما در حال حاضر خالی است.\nآیدی عددی شما: {message.author.id}")
         
-    elif message.content == "📞 پشتیبانی":
-        await message.reply("برای ارتباط با پشتیبانی پیام خود را بفرستید.")
+    elif text == "پشتیبانی":
+        await message.reply("📞 برای ارتباط با پشتیبانی پیام خود را بفرستید.")
 
 # ---------------------------------------------------------
 # تابع اصلی برای شروع به کار ربات
