@@ -2,7 +2,6 @@ import os
 import threading
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from bale import MenuKeyboardMarkup, Button
 from bot import bot
 
 # ---------------------------------------------------------
@@ -46,35 +45,57 @@ def start_health_server():
     server.serve_forever()
 
 # ---------------------------------------------------------
-# کیبورد اصلی ربات (منو)
+# کیبورد اصلی ربات (منو به صورت آرایه متنی ساده)
 # ---------------------------------------------------------
 def get_main_keyboard():
-    return MenuKeyboardMarkup(
-        [
-            [Button("💎 شروع کسب درآمد 💎")],
-            [Button("🏠 حساب کاربری"), Button("🌟 برترین کاربران")],
-            [Button("💸 برداشت از حساب"), Button("📊 تاریخچه برداشت")],
-            [Button("📜 قوانین"), Button("📞 پشتیبانی"), Button("📚 راهنما")]
+    return {
+        "keyboard": [
+            [{"text": "💎 شروع کسب درآمد 💎"}],
+            [{"text": "🏠 حساب کاربری"}, {"text": "🌟 برترین کاربران"}],
+            [{"text": "💸 برداشت از حساب"}, {"text": "📊 تاریخچه برداشت"}],
+            [{"text": "📜 قوانین"}, {"text": "📞 پشتیبانی"}, {"text": "📚 راهنما"}]
         ],
-        resize_keyboard=True
-    )
+        "resize_keyboard": True
+    }
 
 # کیبورد مخصوص پنل ادمین
 def get_admin_keyboard():
-    return MenuKeyboardMarkup(
-        [
-            [Button("📊 آمار کل ربات"), Button("📢 ارسال پیام همگانی")],
-            [Button("🔙 بازگشت به منو اصلی")]
+    return {
+        "keyboard": [
+            [{"text": "📊 آمار کل ربات"}, {"text": "📢 ارسال پیام همگانی"}],
+            [{"text": "🔙 بازگشت به منو اصلی"}]
         ],
-        resize_keyboard=True
-    )
+        "resize_keyboard": True
+    }
+
+# کیبورد بخش برداشت
+def get_withdraw_keyboard():
+    return {
+        "keyboard": [
+            [{"text": "💳 کارت به کارت"}, {"text": "🎁 پاکت هدیه"}],
+            [{"text": "🔙 بازگشت به منو اصلی"}]
+        ],
+        "resize_keyboard": True
+    }
+
+# کیبورد دکمه ادمین در حساب کاربری
+def get_admin_option_keyboard():
+    return {
+        "keyboard": [
+            [{"text": "🛠️ پنل ادمین"}],
+            [{"text": "🔙 بازگشت به منو اصلی"}]
+        ],
+        "resize_keyboard": True
+    }
 
 # ---------------------------------------------------------
 # مدیریت رویدادها و پیام‌های ربات
 # ---------------------------------------------------------
 @bot.event
 async def on_ready():
-    print(f"[Success] Bot @{bot.username} is ONLINE with Admin: {ADMIN_ID}")
+    print("====================================")
+    print(f"[Success] Bot @Havijbkbot is ONLINE now!")
+    print("====================================")
 
 @bot.event
 async def on_message(message):
@@ -89,7 +110,7 @@ async def on_message(message):
             "invited_by": None,
             "invites_count": 0,
             "username": message.author.username or "کاربر بله",
-            "step": "none"  # برای ردیابی مراحل پیام همگانی یا برداشت
+            "step": "none"
         }
         save_db(db)
 
@@ -98,7 +119,6 @@ async def on_message(message):
     # ---------------------------------------------------------
     # بخش پاسخ‌های در انتظار (وضعیت‌ها یا Steps)
     # ---------------------------------------------------------
-    # الف) اگر ادمین در حال ارسال پیام همگانی است
     if user_id == ADMIN_ID and user_data.get("step") == "broadcasting":
         db[ADMIN_ID]["step"] = "none"
         save_db(db)
@@ -114,15 +134,14 @@ async def on_message(message):
             except:
                 pass
         
-        await message.reply(f"📢 پیام همگانی شما با موفقیت به {success_count} کاربر ارسال شد.")
+        await message.reply(f"📢 پیام همگانی شما با موفقیت به {success_count} کاربر ارسال شد.", reply_markup=get_main_keyboard())
         return
 
-    # ب) اگر کاربر معمولی در حال وارد کردن مبلغ برداشت است
     if user_data.get("step") == "entering_withdraw_amount":
         db[user_id]["step"] = "none"
         save_db(db)
         
-        # ارسال اعلان فوری به ادمین (شما)
+        # ارسال اعلان فوری به شما
         notification_text = (
             f"🚨 **درخواست جدید برداشت از حساب!**\n\n"
             f"👤 کاربر: {user_data['username']}\n"
@@ -136,7 +155,7 @@ async def on_message(message):
         except Exception as e:
             print(f"Failed to notify admin: {e}")
             
-        await message.reply("✅ درخواست برداشت شما ثبت شد و برای ادمین ارسال گردید.\nپس از بررسی واریز خواهد شد.")
+        await message.reply("✅ درخواست برداشت شما ثبت شد و برای ادمین ارسال گردید.\nپس از بررسی واریز خواهد شد.", reply_markup=get_main_keyboard())
         return
 
     # ---------------------------------------------------------
@@ -180,13 +199,8 @@ async def on_message(message):
             f"✅ تعداد زیرمجموعه‌های احراز شده: {user_data['invites_count']}\n"
             f"❌ تعداد زیرمجموعه‌های احراز نشده: 0"
         )
-        # اگر کاربر خودِ ادمین باشد، دکمه پنل ادمین را هم برایش می‌فرستیم
         if user_id == ADMIN_ID:
-            admin_option_keyboard = MenuKeyboardMarkup(
-                [[Button("🛠️ پنل ادمین")], [Button("🔙 بازگشت به منو اصلی")]],
-                resize_keyboard=True
-            )
-            await message.reply(profile_text + "\n\n⚙️ شما ادمین اصلی ربات هستید.", reply_markup=admin_option_keyboard)
+            await message.reply(profile_text + "\n\n⚙️ شما ادمین اصلی ربات هستید.", reply_markup=get_admin_option_keyboard())
         else:
             await message.reply(profile_text)
 
@@ -199,11 +213,7 @@ async def on_message(message):
         await message.reply(leaderboard)
 
     elif text == "💸 برداشت از حساب":
-        withdraw_keyboard = MenuKeyboardMarkup(
-            [[Button("💳 کارت به کارت"), Button("🎁 پاکت هدیه")], [Button("🔙 بازگشت به منو اصلی")]],
-            resize_keyboard=True
-        )
-        await message.reply("لطفاً یکی از روش‌های برداشت زیر را انتخاب کنید:", reply_markup=withdraw_keyboard)
+        await message.reply("لطفاً یکی از روش‌های برداشت زیر را انتخاب کنید:", reply_markup=get_withdraw_keyboard())
 
     elif text in ["💳 کارت به کارت", "🎁 پاکت هدیه"]:
         db[user_id]["step"] = "entering_withdraw_amount"
@@ -225,7 +235,7 @@ async def on_message(message):
             "مرحله دوم: بزن رو دکمه 💎 شروع کسب درآمد 💎\n"
             "مرحله سوم: لینک مخصوص رو برای همه دوستانت بفرست\n"
             "مرحله چهارم: بگو استارت کنن عضو کانال های بات بشن\n"
-            "و در آخر با هر دعوت ۱۱۵,۰۰0 تومان پاداش میگیری ❤️"
+            "و در آخر با هر دعوت ۱۱۵,۰۰۰ تومان پاداش میگیری ❤️"
         )
         await message.reply(help_guide)
 
@@ -256,5 +266,5 @@ if __name__ == "__main__":
     web_thread = threading.Thread(target=start_health_server, daemon=True)
     web_thread.start()
     
-    print("[Bot] Connecting to Bale servers with Admin privileges...")
+    print("[Bot] Connecting to Bale servers...")
     bot.run()
